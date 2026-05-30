@@ -7,6 +7,7 @@ import { MetricsProvider } from "./contexts/MetricsContext";
 import { SeekProvider } from "./contexts/SeekContext";
 import { TabBarLayoutProvider } from "./contexts/TabBarLayoutContext";
 import { useFPSMonitor } from "./hooks/useFPSMonitor";
+import { katechonTheme } from "./theme/katechon";
 
 export default function App() {
     useFPSMonitor(true);
@@ -37,10 +38,10 @@ export default function App() {
 const styles = StyleSheet.create({
     safeArea: {
         flex: 1,
-        backgroundColor: "#000",
+        backgroundColor: katechonTheme.bg,
     },
     container: {
         flex: 1,
-        backgroundColor: "#000",
+        backgroundColor: katechonTheme.bg,
     },
 });

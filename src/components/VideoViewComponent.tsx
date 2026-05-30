@@ -296,6 +296,7 @@ const VideoViewComponent = React.memo(
                     <View style={styles.touchArea} />
                 </TouchableWithoutFeedback>
                 <VideoOverlay
+                    video={video}
                     isVisible={isActive}
                     isPaused={userPaused}
                     progress={progress}

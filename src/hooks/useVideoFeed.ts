@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Platform } from "react-native";
 import { SOURCES } from "../utils/utils";
 import { Video } from "../types";
+import { katechonDeck } from "../theme/katechon";
 
 const CYCLE_COUNT = Platform.OS === "android" ? 10 : 20;
 
@@ -17,10 +18,14 @@ const useVideoFeed = () => {
 
             const videoList = Array.from({ length: CYCLE_COUNT }).flatMap(
                 (_, cycleIndex) =>
-                    SOURCES.map((url, index) => ({
-                        id: `${cycleIndex}-${index}`,
-                        url,
-                    })),
+                    SOURCES.map((url, index) => {
+                        const deck = katechonDeck[index % katechonDeck.length];
+                        return {
+                            id: `${cycleIndex}-${index}`,
+                            url,
+                            ...deck,
+                        };
+                    }),
             );
 
             setVideos(videoList);

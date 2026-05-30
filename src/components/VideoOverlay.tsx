@@ -19,15 +19,14 @@ import {
     TAB_BAR_HEIGHT,
 } from "../constants/tabBar";
 import { PERFORMANCE_MONITOR_ENABLED } from "../utils/performance";
+import { Video } from "../types";
+import { katechonTheme } from "../theme/katechon";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const PLAY_BUTTON_SIZE = 88;
 const PLAY_BUTTON_HALF = PLAY_BUTTON_SIZE / 2;
 const RIGHT_ICON_SIZE = 34;
-const RIGHT_ICON_OPACITY = 0.88;
-const RIGHT_GAP = 18;
-const AVATAR_SIZE = 40;
-/** Vertical offset so the right icon column aligns with the bottom of the description block. */
+const AVATAR_SIZE = 42;
 const BOTTOM_SECTION_MARGIN = 22;
 const SEEK_BAR_HEIGHT = 3;
 const SEEK_BAR_HIT_SLOP = 14;
@@ -47,6 +46,7 @@ function formatSeekTime(seconds: number): string {
 }
 
 interface VideoOverlayProps {
+    video: Video;
     isVisible: boolean;
     isPaused: boolean;
     progress?: number;
@@ -55,6 +55,7 @@ interface VideoOverlayProps {
 }
 
 const VideoOverlay = ({
+    video,
     isVisible,
     isPaused,
     progress = 0,
@@ -238,54 +239,80 @@ const VideoOverlay = ({
                 ]}
                 pointerEvents="none"
             >
-                <Ionicons name="play" size={66} color="#fff" />
+                <View style={styles.playButtonHalo}>
+                    <Ionicons name="play" size={54} color={katechonTheme.bg} />
+                </View>
             </Animated.View>
 
-            <View style={[styles.overlayRight, { bottom: rightColumnBottom }]}>
+            <View style={styles.topRail} pointerEvents="box-none">
+                <View style={styles.brandCluster}>
+                    <Text style={styles.brand}>KATECHON</Text>
+                    <View style={styles.livePill}>
+                        <View style={styles.liveDot} />
+                        <Text style={styles.liveText}>{video.cadence}</Text>
+                    </View>
+                </View>
+                <Text style={styles.deckLabel} numberOfLines={1}>
+                    {video.workspace}
+                </Text>
+            </View>
+
+            <View style={styles.scanFrame} pointerEvents="none">
+                <View
+                    style={[
+                        styles.corner,
+                        styles.cornerTopLeft,
+                        { borderColor: video.accent },
+                    ]}
+                />
+                <View
+                    style={[
+                        styles.corner,
+                        styles.cornerBottomRight,
+                        { borderColor: video.accent },
+                    ]}
+                />
+                <View style={styles.verticalRule} />
+            </View>
+
+            <View style={[styles.operatorRail, { bottom: rightColumnBottom }]}>
+                <View
+                    style={[
+                        styles.avatarPlaceholder,
+                        { borderColor: video.accent },
+                    ]}
+                >
+                    <Text style={styles.avatarText}>K</Text>
+                </View>
                 <TouchableOpacity style={styles.iconButton}>
                     <Ionicons
-                        name="heart"
-                        size={RIGHT_ICON_SIZE}
-                        color={`rgba(255,255,255,${RIGHT_ICON_OPACITY})`}
+                        name="radio"
+                        size={RIGHT_ICON_SIZE - 7}
+                        color={video.accent}
                     />
-                    <Text style={styles.iconLabel}>1.2K</Text>
+                    <Text style={styles.iconLabel}>{video.signal}</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.iconButton}>
                     <Ionicons
-                        name="chatbubble"
-                        size={RIGHT_ICON_SIZE}
-                        color={`rgba(255,255,255,${RIGHT_ICON_OPACITY})`}
+                        name="analytics"
+                        size={RIGHT_ICON_SIZE - 6}
+                        color={katechonTheme.text}
                     />
-                    <Text style={styles.iconLabel}>345</Text>
-                </TouchableOpacity>
-                <TouchableOpacity style={styles.iconButton}>
-                    <MaterialCommunityIcons
-                        name="share"
-                        size={RIGHT_ICON_SIZE}
-                        color={`rgba(255,255,255,${RIGHT_ICON_OPACITY})`}
-                    />
-                    <Text style={styles.iconLabel}>Share</Text>
+                    <Text style={styles.iconLabel}>{video.confidence}%</Text>
                 </TouchableOpacity>
                 {PERFORMANCE_MONITOR_ENABLED && (
                     <TouchableOpacity
                         style={styles.iconButton}
                         onPress={toggleMetrics}
                     >
-                        <Ionicons
-                            name="stats-chart"
-                            size={RIGHT_ICON_SIZE}
-                            color={`rgba(255,255,255,${RIGHT_ICON_OPACITY})`}
+                        <MaterialCommunityIcons
+                            name="chart-timeline-variant"
+                            size={RIGHT_ICON_SIZE - 5}
+                            color={katechonTheme.cyan}
                         />
-                        <Text style={styles.iconLabel}>Metrics</Text>
+                        <Text style={styles.iconLabel}>TTFF</Text>
                     </TouchableOpacity>
                 )}
-                <View style={styles.avatarPlaceholder}>
-                    <Ionicons
-                        name="person"
-                        size={AVATAR_SIZE * 0.5}
-                        color="rgba(255,255,255,0.6)"
-                    />
-                </View>
             </View>
 
             <View
@@ -366,15 +393,37 @@ const VideoOverlay = ({
                 ]}
             >
                 <View style={styles.captionArea}>
-                    <Text style={styles.captionUsername} numberOfLines={1}>
-                        @username
+                    <View style={styles.captionHeader}>
+                        <Text style={styles.captionKicker}>
+                            {video.operator} / {video.lens}
+                        </Text>
+                        <View
+                            style={[
+                                styles.signalPill,
+                                { borderColor: video.accent },
+                            ]}
+                        >
+                            <Text
+                                style={[
+                                    styles.signalPillText,
+                                    { color: video.accent },
+                                ]}
+                            >
+                                {video.signal}
+                            </Text>
+                        </View>
+                    </View>
+                    <Text style={styles.captionTitle} numberOfLines={1}>
+                        {video.title}
                     </Text>
-                    <Text style={styles.captionDescLine1}>
-                        Video title placeholder. Placeholder description here.
+                    <Text style={styles.captionDesc} numberOfLines={3}>
+                        {video.briefing}
                     </Text>
-                    <Text style={styles.captionDescLine2}>
-                        More placeholder description here.
-                    </Text>
+                    <View style={styles.microGrid}>
+                        <Text style={styles.microText}>HLS READY</Text>
+                        <Text style={styles.microText}>VOICE ROUTER</Text>
+                        <Text style={styles.microText}>REMOTE OS</Text>
+                    </View>
                 </View>
             </Animated.View>
         </Animated.View>
@@ -390,36 +439,136 @@ export const styles = StyleSheet.create({
         bottom: 0,
         justifyContent: "flex-end",
         alignItems: "flex-end",
-        paddingLeft: 14,
-        paddingRight: 14,
+        paddingLeft: OVERLAY_HORIZONTAL_PADDING,
+        paddingRight: OVERLAY_HORIZONTAL_PADDING,
         zIndex: 25,
     },
-    overlayRight: {
+    topRail: {
         position: "absolute",
-        right: 14,
+        top: Platform.OS === "android" ? 32 : 58,
+        left: 18,
+        right: 18,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        zIndex: 12,
+    },
+    brandCluster: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+    },
+    brand: {
+        color: katechonTheme.text,
+        fontSize: 13,
+        fontWeight: "800",
+        letterSpacing: 2,
+    },
+    livePill: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+        borderWidth: 1,
+        borderColor: katechonTheme.lineHot,
+        backgroundColor: "rgba(0,232,123,0.08)",
+        borderRadius: 5,
+        paddingHorizontal: 8,
+        paddingVertical: 5,
+    },
+    liveDot: {
+        width: 6,
+        height: 6,
+        borderRadius: 3,
+        backgroundColor: katechonTheme.green,
+    },
+    liveText: {
+        color: katechonTheme.green,
+        fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+        fontSize: 10,
+        letterSpacing: 1,
+        fontWeight: "700",
+    },
+    deckLabel: {
+        color: katechonTheme.muted,
+        fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+        fontSize: 11,
+        letterSpacing: 1.4,
+        textTransform: "uppercase",
+        maxWidth: SCREEN_WIDTH * 0.42,
+    },
+    scanFrame: {
+        position: "absolute",
+        top: Platform.OS === "android" ? 82 : 110,
+        left: 18,
+        right: 18,
+        bottom: 132,
+        borderWidth: 1,
+        borderColor: "rgba(242,244,247,0.06)",
+    },
+    corner: {
+        position: "absolute",
+        width: 44,
+        height: 44,
+    },
+    cornerTopLeft: {
+        top: -1,
+        left: -1,
+        borderTopWidth: 2,
+        borderLeftWidth: 2,
+    },
+    cornerBottomRight: {
+        right: -1,
+        bottom: -1,
+        borderRightWidth: 2,
+        borderBottomWidth: 2,
+    },
+    verticalRule: {
+        position: "absolute",
+        top: 20,
+        bottom: 20,
+        left: 12,
+        width: 1,
+        backgroundColor: "rgba(242,244,247,0.10)",
+    },
+    operatorRail: {
+        position: "absolute",
+        right: 16,
         justifyContent: "flex-end",
         alignItems: "center",
-        gap: RIGHT_GAP,
+        gap: 13,
         zIndex: 10,
     },
     iconButton: {
         alignItems: "center",
+        justifyContent: "center",
+        minWidth: 48,
+        minHeight: 48,
+        borderWidth: 1,
+        borderColor: katechonTheme.line,
+        borderRadius: 7,
+        backgroundColor: "rgba(5,6,8,0.46)",
     },
     avatarPlaceholder: {
         width: AVATAR_SIZE,
         height: AVATAR_SIZE,
-        borderRadius: AVATAR_SIZE / 2,
-        backgroundColor: "rgba(255,255,255,0.2)",
-        borderWidth: 2,
-        borderColor: "rgba(255,255,255,0.4)",
+        borderRadius: 7,
+        backgroundColor: katechonTheme.panelStrong,
+        borderWidth: 1,
         justifyContent: "center",
         alignItems: "center",
     },
+    avatarText: {
+        color: katechonTheme.text,
+        fontSize: 18,
+        fontWeight: "800",
+    },
     iconLabel: {
-        color: `rgba(255,255,255,${RIGHT_ICON_OPACITY})`,
-        fontSize: 12,
-        marginTop: 4,
-        fontWeight: "600",
+        color: katechonTheme.muted,
+        fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+        fontSize: 9,
+        marginTop: 3,
+        fontWeight: "700",
+        letterSpacing: 0.5,
         textShadowColor: "rgba(0,0,0,0.8)",
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 2,
@@ -434,6 +583,16 @@ export const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
+    playButtonHalo: {
+        width: PLAY_BUTTON_SIZE,
+        height: PLAY_BUTTON_SIZE,
+        borderRadius: PLAY_BUTTON_HALF,
+        backgroundColor: "rgba(0,232,123,0.86)",
+        borderWidth: 1,
+        borderColor: "rgba(217,255,233,0.66)",
+        justifyContent: "center",
+        alignItems: "center",
+    },
     bottomSection: {
         alignSelf: "stretch",
     },
@@ -443,13 +602,13 @@ export const styles = StyleSheet.create({
     },
     seekBarTrack: {
         height: SEEK_BAR_HEIGHT,
-        backgroundColor: "rgba(255,255,255,0.3)",
+        backgroundColor: "rgba(242,244,247,0.22)",
         borderRadius: SEEK_BAR_HEIGHT / 2,
         overflow: "hidden",
     },
     seekBarFill: {
         height: "100%",
-        backgroundColor: "#fff",
+        backgroundColor: katechonTheme.green,
         borderRadius: SEEK_BAR_HEIGHT / 2,
     },
     seekTimer: {
@@ -457,43 +616,89 @@ export const styles = StyleSheet.create({
         alignSelf: "center",
         paddingHorizontal: 16,
         paddingVertical: 10,
-        backgroundColor: "rgba(0,0,0,0.65)",
+        backgroundColor: katechonTheme.panelStrong,
+        borderWidth: 1,
+        borderColor: katechonTheme.lineHot,
         borderRadius: 8,
     },
     seekTimerText: {
-        color: "#fff",
+        color: katechonTheme.text,
+        fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
         fontSize: 20,
         fontWeight: "600",
     },
     captionArea: {
-        paddingRight: 88,
+        width: Math.min(SCREEN_WIDTH - 104, 430),
+        padding: 14,
+        paddingRight: 16,
+        borderWidth: 1,
+        borderColor: katechonTheme.line,
+        borderRadius: 8,
+        backgroundColor: katechonTheme.panel,
     },
-    captionUsername: {
-        color: "#fff",
-        fontSize: 14,
-        fontWeight: "700",
-        marginBottom: 2,
+    captionHeader: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: 10,
+        marginBottom: 8,
+    },
+    captionKicker: {
+        color: katechonTheme.soft,
+        flex: 1,
+        fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+        fontSize: 10,
+        letterSpacing: 1.3,
+        textTransform: "uppercase",
+    },
+    signalPill: {
+        borderWidth: 1,
+        borderRadius: 5,
+        paddingHorizontal: 7,
+        paddingVertical: 4,
+        backgroundColor: "rgba(5,6,8,0.36)",
+    },
+    signalPillText: {
+        fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+        fontSize: 9,
+        fontWeight: "800",
+        letterSpacing: 1,
+    },
+    captionTitle: {
+        color: katechonTheme.text,
+        fontSize: 27,
+        lineHeight: 31,
+        fontWeight: "800",
+        marginBottom: 7,
         textShadowColor: "rgba(0,0,0,0.8)",
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 2,
     },
-    captionDescLine1: {
-        color: "rgba(255,255,255,0.92)",
+    captionDesc: {
+        color: katechonTheme.muted,
         fontSize: 13,
         lineHeight: 18,
-        marginTop: 0,
         textShadowColor: "rgba(0,0,0,0.8)",
         textShadowOffset: { width: 0, height: 1 },
         textShadowRadius: 2,
     },
-    captionDescLine2: {
-        color: "rgba(255,255,255,0.92)",
-        fontSize: 13,
-        lineHeight: 18,
-        marginTop: 2,
-        textShadowColor: "rgba(0,0,0,0.8)",
-        textShadowOffset: { width: 0, height: 1 },
-        textShadowRadius: 2,
+    microGrid: {
+        flexDirection: "row",
+        flexWrap: "wrap",
+        gap: 6,
+        marginTop: 12,
+    },
+    microText: {
+        color: katechonTheme.green,
+        fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+        fontSize: 9,
+        letterSpacing: 0.8,
+        borderWidth: 1,
+        borderColor: "rgba(0,232,123,0.28)",
+        borderRadius: 4,
+        paddingHorizontal: 6,
+        paddingVertical: 4,
+        backgroundColor: "rgba(0,232,123,0.07)",
     },
 });
 
